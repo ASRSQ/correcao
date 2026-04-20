@@ -1,0 +1,33 @@
+# Laravel
+/vendor
+/node_modules
+/public/storage
+/storage/*.key
+.env
+.env.backup
+.phpunit.result.cache
+Homestead.yaml
+Homestead.json
+/.vagrant
+
+# Logs
+/storage/logs/*.log
+
+# IDEs
+/.idea
+/.vscode
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Build
+/public/hot
+/public/build
+
+# Composer
+composer.lock
+
+# NPM
+package-lock.json
+yarn.lock
