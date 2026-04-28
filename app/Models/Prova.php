@@ -6,11 +6,21 @@ use Illuminate\Database\Eloquent\Model;
 
 class Prova extends Model
 {
-     protected $fillable = ['nome', 'qtd_questoes', 'qtd_alternativas'];
+     protected $fillable = [
+        'nome',
+        'qtd_questoes',
+        'qtd_alternativas',
+        'escola_id',
+        'serie'
+    ];
 
     public function gabaritos()
     {
         return $this->hasMany(Gabarito::class);
+    }
+    public function aluno()
+    {
+        return $this->belongsTo(\App\Models\Aluno::class);
     }
     
 }

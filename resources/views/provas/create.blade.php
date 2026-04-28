@@ -31,6 +31,30 @@
                                    required>
                         </div>
 
+                        <!-- ESCOLA -->
+                        <div class="mb-3">
+                            <label class="form-label">Escola</label>
+                            <select name="escola_id" class="form-select" required>
+                                <option value="">Selecione a escola</option>
+                                @foreach($escolas as $escola)
+                                    <option value="{{ $escola->id }}">
+                                        {{ $escola->nome }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+
+                        <!-- SÉRIE -->
+                        <div class="mb-3">
+                            <label class="form-label">Série</label>
+                            <select name="serie" class="form-select" required>
+                                <option value="">Selecione a série</option>
+                                <option value="1º Ano">1º Ano</option>
+                                <option value="2º Ano">2º Ano</option>
+                                <option value="3º Ano">3º Ano</option>
+                            </select>
+                        </div>
+
                         <!-- QUESTÕES -->
                         <div class="mb-3">
                             <label class="form-label">Quantidade de Questões</label>

@@ -19,3 +19,32 @@ Route::get('/resultado/{id}', [ProvaController::class, 'resultado'])
     ->name('provas.resultado');
 Route::get('/dashboard', [ProvaController::class, 'dashboard'])
     ->name('provas.dashboard');
+
+Route::get('/provas', [PdfController::class, 'index']);
+
+
+Route::get('/pdf/{prova}/selecionar', [PdfController::class, 'selecionarAluno'])->name('pdf.selecionar');
+
+Route::get('/pdf/{prova}/{aluno}', [PdfController::class, 'gerarIndividual'])->name('pdf.individual');
+
+Route::get('/pdf-lote/{prova}', [PdfController::class, 'gerarLote'])->name('pdf.lote');
+
+Route::get('/pdf-preview/{prova}/{aluno}', [PdfController::class, 'preview'])
+    ->name('pdf.preview');
+
+Route::get('/prova/{prova}/aluno/{aluno}/desempenho',
+    [PdfController::class, 'desempenho'])
+    ->name('prova.desempenho');
+
+Route::put('/resultados/{id}', [ProvaController::class, 'resultados_update'])
+    ->name('resultados.update');
+Route::get('/provas/{prova}/resultado-avulso', [ProvaController::class, 'formAvulso'])
+    ->name('resultados.avulso.form');
+
+Route::post('/provas/{prova}/resultado-avulso', [ProvaController::class, 'storeAvulso'])
+    ->name('resultados.avulso.store');
+Route::get('/pdf/lote-step/{prova}/{index}', [PdfController::class, 'gerarLoteStep'])
+    ->name('pdf.lote.step');
+
+Route::get('/download-zip/{prova}', [PdfController::class, 'download'])
+    ->name('download.zip');
