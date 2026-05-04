@@ -13,13 +13,16 @@ use ZipArchive;
 class PdfController extends Controller
 {
     // 👁️ Tela de seleção
-    public function selecionarAluno($provaId)
-    {
-        $prova = Prova::findOrFail($provaId);
-        $alunos = Aluno::all();
+ public function selecionarAluno($provaId)
+{
+    $prova = Prova::findOrFail($provaId);
 
-        return view('pdf.selecionar', compact('prova', 'alunos'));
-    }
+    $alunos = Aluno::where('escola_id', $prova->escola_id)
+                   ->where('serie_id', $prova->serie_id)
+                   ->get();
+
+    return view('pdf.selecionar', compact('prova', 'alunos'));
+}
 
     // 📄 Gerar PDF individual
     public function gerarIndividual($provaId, $alunoId)
@@ -29,8 +32,13 @@ class PdfController extends Controller
 
         $prova->aluno = $aluno;
 
-        $html = view('pdf.cartao', compact('prova'))->render();
+  
 
+$cabecalho = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/cabecalho.png'));
+
+$footer = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/footer.png'));
+
+$html = view('pdf.cartao', compact('prova', 'cabecalho', 'footer'))->render();
         $response = Http::post('http://173.249.27.52:3000/gerar-pdf', [
             'html' => $html
         ]);
@@ -102,43 +110,99 @@ public function gerarLote($provaId)
 
     return response()->download($zipFileName)->deleteFileAfterSend(true);
 }
+
 public function gerarLoteStep($provaId, $index)
 {
     $prova = Prova::findOrFail($provaId);
-    $alunos = Aluno::all();
+    $alunos = Aluno::where('escola_id', $prova->escola_id)
+               ->where('serie_id', $prova->serie_id)
+               ->get()
+               ->values(); // ✅ agora sim
 
-    if (!isset($alunos[$index])) {
-        return response()->json(['finalizado' => true]);
-    }
-
-    $aluno = $alunos[$index];
+    // 🔥 BASE64 IGUAL AO INDIVIDUAL
+    $cabecalho = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/cabecalho.png'));
+    $footer = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/footer.png'));
 
     $zipPath = storage_path("app/gabaritos_$provaId.zip");
-
     $zip = new ZipArchive();
     $zip->open($zipPath, ZipArchive::CREATE);
 
-    $prova->aluno = $aluno;
+    // =========================
+    // 🎯 GERAR ALUNOS
+    // =========================
+    if (isset($alunos[$index])) {
 
-    $html = view('pdf.cartao', compact('prova'))->render();
+        $aluno = $alunos[$index];
+        $prova->aluno = $aluno;
 
-    $response = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
-        'html' => $html
+        // 🔥 IGUAL AO INDIVIDUAL
+        $html = view('pdf.cartao', compact('prova', 'cabecalho', 'footer'))->render();
+
+        $response = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
+            'html' => $html
+        ]);
+
+        if ($response->successful()) {
+            $zip->addFromString(
+                'gabarito_' . $aluno->matricula . '.pdf',
+                $response->body()
+            );
+        }
+
+        $zip->close();
+
+        return response()->json([
+            'finalizado' => false,
+            'index' => $index + 1,
+            'total' => count($alunos)
+        ]);
+    }
+
+    // =========================
+    // 📄 CARTÃO EM BRANCO
+    // =========================
+
+    $alunoFake = new \stdClass();
+    $alunoFake->nome = '';
+    $alunoFake->matricula = '';
+    $alunoFake->serie_id = '';
+    $alunoFake->escola = (object)['nome' => ''];
+
+    $prova->aluno = $alunoFake;
+
+    // QR genérico
+    $qr = base64_encode(
+        \QrCode::format('png')->size(120)->generate(json_encode([
+            'prova' => $prova->id,
+            'aluno' => '0000',
+            'tipo' => 'blank'
+        ]))
+    );
+
+    // 🔥 IMPORTANTE: mantém base64 aqui também
+    $htmlBranco = view('pdf.cartao', [
+        'prova' => $prova,
+        'cabecalho' => $cabecalho,
+        'footer' => $footer,
+        'qr' => $qr
+    ])->render();
+
+    $responseBranco = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
+        'html' => $htmlBranco
     ]);
 
-    if ($response->successful()) {
+    if ($responseBranco->successful()) {
         $zip->addFromString(
-            'gabarito_' . $aluno->matricula . '.pdf',
-            $response->body()
+            'cartao_branco.pdf',
+            $responseBranco->body()
         );
     }
 
     $zip->close();
 
     return response()->json([
-        'finalizado' => false,
-        'index' => $index + 1,
-        'total' => count($alunos)
+        'finalizado' => true,
+        'download' => url("storage/gabaritos_$provaId.zip")
     ]);
 }
 

@@ -12,12 +12,15 @@ class Aluno extends Model
     protected $table = 'alunos';
 
     protected $fillable = [
-        'nome',
-        'matricula',
-        'serie',
-        'escola_id',
-    ];
-
+    'nome',
+    'matricula',
+    'serie_id', // ✅ corrigido
+    'escola_id',
+];
+public function serie()
+{
+    return $this->belongsTo(Serie::class); // ✅ novo
+}
     // 🔗 Relacionamentos
     public function escola()
     {

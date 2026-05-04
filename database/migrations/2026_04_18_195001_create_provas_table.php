@@ -11,13 +11,23 @@ return new class extends Migration
      */
     public function up()
 {
-    Schema::create('provas', function (Blueprint $table) {
-        $table->id();
-        $table->string('nome');
-        $table->integer('qtd_questoes');
-        $table->integer('qtd_alternativas');
-        $table->timestamps();
-    });
+   Schema::create('provas', function (Blueprint $table) {
+    $table->id();
+    $table->string('nome');
+
+    $table->integer('qtd_questoes');
+    $table->integer('qtd_alternativas');
+
+    $table->foreignId('escola_id')
+        ->constrained('escolas')
+        ->cascadeOnDelete();
+
+    $table->foreignId('serie_id')
+        ->constrained('series')
+        ->cascadeOnDelete();
+
+    $table->timestamps();
+});
 }
 
     /**

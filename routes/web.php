@@ -48,3 +48,5 @@ Route::get('/pdf/lote-step/{prova}/{index}', [PdfController::class, 'gerarLoteSt
 
 Route::get('/download-zip/{prova}', [PdfController::class, 'download'])
     ->name('download.zip');
+Route::post('/prova/{id}/corrigir-lote', [ProvaController::class, 'corrigirLoteStep'])
+    ->name('corrigir.lote');

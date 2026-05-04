@@ -12,18 +12,22 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('alunos', function (Blueprint $table) {
-            $table->id();
+        $table->id();
 
-            $table->string('nome');
-            $table->string('matricula')->unique();
-            $table->string('serie');
+        $table->string('nome');
+        $table->string('matricula')->unique();
 
-            $table->foreignId('escola_id')
-                ->constrained('escolas')
-                ->cascadeOnDelete();
+        $table->foreignId('escola_id')
+            ->constrained('escolas')
+            ->cascadeOnDelete();
 
-            $table->timestamps();
-        });
+        // 🔥 CORRETO
+        $table->foreignId('serie_id')
+            ->constrained('series')
+            ->cascadeOnDelete();
+
+        $table->timestamps();
+    });
     }
 
     /**

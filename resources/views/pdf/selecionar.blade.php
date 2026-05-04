@@ -27,7 +27,7 @@
                 <tr>
                     <td>{{ $aluno->nome }}</td>
                     <td>{{ $aluno->matricula }}</td>
-                    <td>{{ $aluno->serie }}</td>
+                    <td>{{ $aluno->serie->nome ?? '' }}</td>
                     <td>
                     <a href="{{ route('pdf.individual', [$prova->id, $aluno->id]) }}"
                     class="btn btn-success btn-sm">

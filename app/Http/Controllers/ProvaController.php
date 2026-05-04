@@ -6,8 +6,10 @@ use App\Models\Prova;
 use App\Models\Gabarito;
 use App\Models\Aluno;
 use App\Models\Resultado;
+use App\Models\Serie;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use App\Models\Escola;
 
 class ProvaController extends Controller
@@ -20,22 +22,22 @@ class ProvaController extends Controller
     }
 
     // FORM DE CRIAÇÃO
-    public function create()
+public function create()
 {
     $escolas = Escola::all();
+    $series = Serie::all(); // 🔥 agora certo
 
-    return view('provas.create', compact('escolas'));
+    return view('provas.create', compact('escolas', 'series'));
 }
-
     // SALVAR PROVA (SEM GABARITO AINDA)
-    public function store(Request $request)
+ public function store(Request $request)
 {
     $request->validate([
         'nome' => 'required',
         'qtd_questoes' => 'required|integer|min:1',
         'qtd_alternativas' => 'required|integer|min:2',
         'escola_id' => 'required|exists:escolas,id',
-        'serie' => 'required'
+        'serie_id' => 'required|exists:series,id'
     ]);
 
     $prova = Prova::create([
@@ -43,7 +45,7 @@ class ProvaController extends Controller
         'qtd_questoes' => $request->qtd_questoes,
         'qtd_alternativas' => $request->qtd_alternativas,
         'escola_id' => $request->escola_id,
-        'serie' => $request->serie
+        'serie_id' => $request->serie_id
     ]);
 
     return redirect("/prova/{$prova->id}/gabarito");
@@ -72,7 +74,87 @@ class ProvaController extends Controller
 
         return redirect('/')->with('success', 'Gabarito salvo!');
     }
+public function corrigirLoteStep(Request $request, $provaId)
+{
+    \Log::info('CORRIGIR LOTE CHAMADO', [
+    'prova_id' => $provaId,
+    'tem_imagem' => $request->hasFile('imagem'),
+    'headers' => $request->headers->all()
+]);
+    $prova = Prova::with('gabaritos')->findOrFail($provaId);
 
+    // 🔥 recebe 1 imagem (não array)
+    $imagem = $request->file('imagem');
+
+    if (!$imagem) {
+        return response()->json([
+            'error' => true,
+            'message' => 'Imagem não enviada'
+        ]);
+    }
+
+    $imagemContent = file_get_contents($imagem);
+
+    $response = Http::attach(
+        'file',
+        $imagemContent,
+        $imagem->getClientOriginalName()
+    )->post('http://127.0.0.1:8000/corrigir', [
+        'qtd_questoes' => $prova->qtd_questoes,
+        'qtd_alternativas' => $prova->qtd_alternativas
+    ]);
+
+    if (!$response->ok()) {
+        return response()->json([
+            'error' => true
+        ]);
+    }
+
+    $dados = $response->json();
+
+    $respostas = $dados['respostas'] ?? [];
+    $invalidas = $dados['invalidas'] ?? [];
+
+    // 🔥 aluno via QR
+    $aluno = null;
+    if (!empty($dados['matricula'])) {
+        $qr = json_decode($dados['matricula'], true);
+        if (isset($qr['aluno'])) {
+            $aluno = Aluno::where('matricula', $qr['aluno'])->first();
+        }
+    }
+
+    // 🔥 correção
+    $gabaritos = $prova->gabaritos->pluck('resposta', 'questao');
+
+    $acertos = 0;
+
+    foreach ($respostas as $q => $resp) {
+        if (
+            isset($gabaritos[$q]) &&
+            $gabaritos[$q] == $resp &&
+            !in_array($q, $invalidas)
+        ) {
+            $acertos++;
+        }
+    }
+
+    $total = $prova->qtd_questoes;
+    $erros = ($total - count($invalidas)) - $acertos;
+
+    Resultado::create([
+        'prova_id' => $prova->id,
+        'aluno_id' => $aluno->id ?? null,
+        'qtd_questoes' => $total,
+        'acertos' => $acertos,
+        'erros' => $erros,
+        'respostas' => json_encode($respostas)
+    ]);
+
+    return response()->json([
+        'success' => true
+    ]);
+}
 public function corrigir(Request $request, $id)
 {
     $prova = Prova::with('gabaritos')->findOrFail($id);
@@ -145,16 +227,18 @@ public function corrigir(Request $request, $id)
     // =========================
     // 💾 SALVAR RESULTADO
     // =========================
-    $resultado = Resultado::create([
+   Resultado::updateOrCreate(
+    [
         'prova_id' => $prova->id,
-        'aluno_id' => $aluno->id ?? null,
-        'qtd_questoes' => $totalQuestoes,
+        'aluno_id' => $aluno->id ?? null
+    ],
+    [
+        'qtd_questoes' => $total,
         'acertos' => $acertos,
         'erros' => $erros,
-        'brancos' => $brancos,
-        'invalidas' => json_encode($invalidas),
         'respostas' => json_encode($respostas)
-    ]);
+    ]
+);
 
     // =========================
     // 🔁 REDIRECIONAR
@@ -232,7 +316,9 @@ public function dashboard()
 public function formAvulso($prova_id)
 {
     $prova = Prova::with('gabaritos')->findOrFail($prova_id);
-    $alunos = Aluno::all();
+    $alunos = Aluno::where('escola_id', $prova->escola_id)
+               ->where('serie_id', $prova->serie_id)
+               ->get();
 
     return view('provas.avulso', compact('prova', 'alunos'));
 }

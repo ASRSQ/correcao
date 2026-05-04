@@ -37,7 +37,7 @@
 
                 <div class="col-md-3">
                     <strong>Série:</strong><br>
-                    {{ $resultado->aluno->serie ?? '-' }}
+                    {{ $resultado->prova->serie->nome ?? '-' }}
                 </div>
 
             </div>
@@ -83,10 +83,14 @@
     </div>
 
     <!-- RESPOSTAS -->
+<form action="{{ route('resultados.update', $resultado->id) }}" method="POST">
+    @csrf
+    @method('PUT')
+
     <div class="card shadow">
         <div class="card-body">
 
-            <h5 class="mb-3">📝 Respostas Marcadas</h5>
+            <h5 class="mb-3">📝 Respostas Marcadas (Editável)</h5>
 
             <div class="row">
                 @foreach ($respostas as $q => $resp)
@@ -96,7 +100,16 @@
                             ->where('questao', $q)
                             ->first()->resposta ?? null;
 
-                        $cor = $resp == $gabarito ? 'success' : 'danger';
+                        // 🎨 Definição de cor
+                        if ($resp === null || $resp === '') {
+                            $cor = 'secondary'; // branco
+                        } elseif ($resp === 'MULT') {
+                            $cor = 'warning'; // múltipla marcação
+                        } elseif ($resp == $gabarito) {
+                            $cor = 'success'; // acerto
+                        } else {
+                            $cor = 'danger'; // erro
+                        }
                     @endphp
 
                     <div class="col-6 col-md-2 mb-3">
@@ -105,12 +118,43 @@
 
                                 <small>Q{{ $q }}</small>
 
-                                <h5 class="mb-0 text-{{ $cor }}">
-                                    {{ $resp ?? '-' }}
-                                </h5>
+                                <!-- SELECT EDITÁVEL -->
+                                <select name="respostas[{{ $q }}]"
+                                        class="form-select form-select-sm text-center mt-1 border-{{ $cor }}">
 
-                                @if($resp != $gabarito)
-                                    <small class="text-muted">
+                                    <!-- Branco -->
+                                    <option value="" {{ ($resp === null || $resp === '') ? 'selected' : '' }}>
+                                        Branco
+                                    </option>
+
+                                    <!-- Múltipla -->
+                                    <option value="MULT" {{ $resp === 'MULT' ? 'selected' : '' }}>
+                                        MULT
+                                    </option>
+
+                                    <!-- Alternativas -->
+                                    @foreach(['A','B','C','D','E'] as $alt)
+                                        <option value="{{ $alt }}" {{ $resp == $alt ? 'selected' : '' }}>
+                                            {{ $alt }}
+                                        </option>
+                                    @endforeach
+
+                                </select>
+
+                                <!-- EXIBIÇÃO DO VALOR -->
+                                <div class="mt-1">
+                                    @if($resp === null || $resp === '')
+                                        <small class="text-muted">⭕ Branco</small>
+                                    @elseif($resp === 'MULT')
+                                        <small class="text-warning">⚠️ MULT</small>
+                                    @else
+                                        <small class="text-{{ $cor }}">{{ $resp }}</small>
+                                    @endif
+                                </div>
+
+                                <!-- GABARITO -->
+                                @if($resp != $gabarito && $resp !== null && $resp !== '' && $resp !== 'MULT')
+                                    <small class="text-muted d-block">
                                         ✔ {{ $gabarito }}
                                     </small>
                                 @endif
@@ -122,9 +166,16 @@
                 @endforeach
             </div>
 
+            <!-- BOTÃO -->
+            <div class="text-end mt-3">
+                <button type="submit" class="btn btn-primary">
+                    💾 Salvar alterações
+                </button>
+            </div>
+
         </div>
     </div>
-
+</form>
 </div>
 
 @endsection

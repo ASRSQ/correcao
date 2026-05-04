@@ -19,6 +19,7 @@
             background: #f4f6f9;
         }
     </style>
+      <meta name="csrf-token" content="{{ csrf_token() }}">
 </head>
 
 <body>

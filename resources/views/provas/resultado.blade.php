@@ -36,7 +36,7 @@
 
                 <div class="col-md-3">
                     <strong>Série:</strong><br>
-                    {{ optional($resultado->aluno)->serie ?? '-' }}
+                    {{ $resultado->prova->serie->nome ?? '-' }}
                 </div>
 
             </div>

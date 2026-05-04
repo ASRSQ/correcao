@@ -44,14 +44,15 @@
                             </select>
                         </div>
 
-                        <!-- SÉRIE -->
                         <div class="mb-3">
                             <label class="form-label">Série</label>
-                            <select name="serie" class="form-select" required>
+                            <select name="serie_id" class="form-select" required>
                                 <option value="">Selecione a série</option>
-                                <option value="1º Ano">1º Ano</option>
-                                <option value="2º Ano">2º Ano</option>
-                                <option value="3º Ano">3º Ano</option>
+                                @foreach($series as $serie)
+                                    <option value="{{ $serie->id }}">
+                                        {{ $serie->nome }}
+                                    </option>
+                                @endforeach
                             </select>
                         </div>
 
