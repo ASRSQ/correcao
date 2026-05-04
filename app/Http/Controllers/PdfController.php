@@ -33,10 +33,13 @@ class PdfController extends Controller
         $prova->aluno = $aluno;
 
   
+$cabecalho = 'data:image/png;base64,' . base64_encode(
+    Http::get('https://spacesolutions.alphi.media/correcao/public/cabecalho.png')->body()
+);
 
-$cabecalho = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/cabecalho.png'));
-
-$footer = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/footer.png'));
+$footer = 'data:image/png;base64,' . base64_encode(
+    Http::get('https://spacesolutions.alphi.media/correcao/public/footer.png')->body()
+);
 
 $html = view('pdf.cartao', compact('prova', 'cabecalho', 'footer'))->render();
         $response = Http::post('http://173.249.27.52:3000/gerar-pdf', [
