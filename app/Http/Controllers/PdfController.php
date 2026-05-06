@@ -147,7 +147,7 @@ public function gerarLoteStep($provaId, $index)
         // 🔥 IGUAL AO INDIVIDUAL
         $html = view('pdf.cartao', compact('prova', 'cabecalho', 'footer'))->render();
 
-        $response = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
+        $response = Http::timeout(60)->post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/pdf/gerar-pdf', [
             'html' => $html
         ]);
 
@@ -196,7 +196,7 @@ public function gerarLoteStep($provaId, $index)
         'qr' => $qr
     ])->render();
 
-    $responseBranco = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
+    $responseBranco = Http::timeout(60)->post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/pdf/gerar-pdf', [
         'html' => $htmlBranco
     ]);
 
