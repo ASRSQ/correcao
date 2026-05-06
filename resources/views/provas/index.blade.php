@@ -173,57 +173,71 @@ document.addEventListener('DOMContentLoaded', function () {
         processarLote();
     }
 
-    function processarLote() {
+   async function processarLote() {
 
-    const url = rotaLoteStep
-        .replace(':prova', provaAtual)
-        .replace(':index', index);
+    try {
 
-    fetch(url)
-        .then(r => r.json())
-        .then(data => {
+        const url = rotaLoteStep
+            .replace(':prova', provaAtual)
+            .replace(':index', index);
 
-            // 🔥 FINALIZOU
-            if (data.finalizado) {
+        // 🔥 mostra status antes
+        document.getElementById('statusLote').innerText =
+            `Gerando ${index + 1}...`;
 
-                document.getElementById('barraLote').style.width = '100%';
-                document.getElementById('barraLote').innerText = '100%';
+        const response = await fetch(url);
+        const data = await response.json();
 
-                document.getElementById('statusLote').innerText =
-                    '✅ Finalizado!';
+        console.log('LOTE:', data);
+
+        // 🔥 progresso
+        let percent = Math.round((data.index / data.total) * 100);
+
+        document.getElementById('barraLote').style.width =
+            percent + '%';
+
+        document.getElementById('barraLote').innerText =
+            percent + '%';
+
+        document.getElementById('statusLote').innerText =
+            `Gerando ${data.index} de ${data.total}`;
+
+        // 🔥 terminou
+        if (data.finalizado) {
+
+            document.getElementById('barraLote').style.width = '100%';
+            document.getElementById('barraLote').innerText = '100%';
+
+            document.getElementById('statusLote').innerText =
+                '✅ Finalizado!';
+
+            // 🔥 espera UI atualizar
+            setTimeout(() => {
 
                 window.location.href =
                     rotaDownload.replace(':prova', provaAtual);
 
-                return;
-            }
+            }, 1000);
 
-            // 🔥 progresso
-            index = data.index;
+            return;
+        }
 
-            let percent = Math.round((index / data.total) * 100);
+        // 🔥 atualiza index
+        index = data.index;
 
-            document.getElementById('barraLote').style.width =
-                percent + '%';
+        // 🔥 MUITO IMPORTANTE:
+        // deixa o navegador respirar
+        setTimeout(() => {
+            processarLote();
+        }, 100);
 
-            document.getElementById('barraLote').innerText =
-                percent + '%';
+    } catch (err) {
 
-            document.getElementById('statusLote').innerText =
-                `Gerando ${index} de ${data.total}`;
+        console.error(err);
 
-            // 🔥 pequeno delay
-            setTimeout(() => {
-                processarLote();
-            }, 50);
-        })
-        .catch(err => {
-
-            console.error(err);
-
-            document.getElementById('statusLote').innerText =
-                '❌ Erro ao gerar PDFs';
-        });
+        document.getElementById('statusLote').innerText =
+            '❌ Erro ao gerar PDFs';
+    }
 }
 
     window.abrirModalLoteCorrecao = function(provaId) {
