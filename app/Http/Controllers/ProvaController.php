@@ -99,7 +99,7 @@ public function corrigirLoteStep(Request $request, $provaId)
         'file',
         $imagemContent,
         $imagem->getClientOriginalName()
-    )->post('http://127.0.0.1:8000/corrigir', [
+    )->post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/omr/corrigir', [
         'qtd_questoes' => $prova->qtd_questoes,
         'qtd_alternativas' => $prova->qtd_alternativas
     ]);
@@ -142,15 +142,18 @@ public function corrigirLoteStep(Request $request, $provaId)
     $total = $prova->qtd_questoes;
     $erros = ($total - count($invalidas)) - $acertos;
 
-    Resultado::create([
+  Resultado::updateOrCreate(
+    [
         'prova_id' => $prova->id,
         'aluno_id' => $aluno->id ?? null,
+    ],
+    [
         'qtd_questoes' => $total,
         'acertos' => $acertos,
         'erros' => $erros,
         'respostas' => json_encode($respostas)
-    ]);
-
+    ]
+);
     return response()->json([
         'success' => true
     ]);
@@ -167,7 +170,7 @@ public function corrigir(Request $request, $id)
         'file',
         $imagemContent,
         'imagem.jpg'
-    )->post('http://127.0.0.1:8000/corrigir', [
+    )->post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/omr/corrigir', [
         'qtd_questoes' => $prova->qtd_questoes,
         'qtd_alternativas' => $prova->qtd_alternativas
     ]);

@@ -42,7 +42,7 @@ $footer = 'data:image/png;base64,' . base64_encode(
 );
 
 $html = view('pdf.cartao', compact('prova', 'cabecalho', 'footer'))->render();
-        $response = Http::post('http://173.249.27.52:3000/gerar-pdf', [
+        $response = Http::post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/pdf/gerar-pdf', [
             'html' => $html
         ]);
 
@@ -82,7 +82,7 @@ public function gerarLote($provaId)
 
                 $html = view('pdf.cartao', compact('prova'))->render();
 
-                $response = Http::timeout(60)->post('http://173.249.27.52:3000/gerar-pdf', [
+                $response = Http::timeout(60)->post('https://4969-2a02-c207-2316-6459-00-1.ngrok-free.app/pdf/gerar-pdf', [
                     'html' => $html
                 ]);
 
