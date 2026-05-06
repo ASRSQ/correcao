@@ -123,8 +123,14 @@ public function gerarLoteStep($provaId, $index)
                ->values(); // ✅ agora sim
 
     // 🔥 BASE64 IGUAL AO INDIVIDUAL
-    $cabecalho = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/cabecalho.png'));
-    $footer = 'data:image/png;base64,' . base64_encode(file_get_contents('https://spacesolutions.alphi.media/correcao/public/footer.png'));
+    $cabecalho = 'data:image/png;base64,' . base64_encode(
+        Http::get('https://spacesolutions.alphi.media/correcao/public/cabecalho.png')->body()
+    );
+
+    $footer = 'data:image/png;base64,' . base64_encode(
+        Http::get('https://spacesolutions.alphi.media/correcao/public/footer.png')->body()
+    );
+
 
     $zipPath = storage_path("app/gabaritos_$provaId.zip");
     $zip = new ZipArchive();
