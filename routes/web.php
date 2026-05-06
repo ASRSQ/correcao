@@ -3,6 +3,10 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ProvaController;
 use App\Http\Controllers\PdfController;
+use App\Http\Controllers\CidadeController;
+use App\Http\Controllers\EscolaController;
+use App\Http\Controllers\SerieController;
+use App\Http\Controllers\AlunoController;
 
 Route::get('/', [ProvaController::class, 'index'])->name('provas.index');
 
@@ -50,3 +54,7 @@ Route::get('/download-zip/{prova}', [PdfController::class, 'download'])
     ->name('download.zip');
 Route::post('/prova/{id}/corrigir-lote', [ProvaController::class, 'corrigirLoteStep'])
     ->name('corrigir.lote');
+Route::resource('cidades', CidadeController::class);
+Route::resource('escolas', EscolaController::class);
+Route::resource('series', SerieController::class);
+Route::resource('alunos', AlunoController::class);
