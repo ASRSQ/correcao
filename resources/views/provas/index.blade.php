@@ -175,23 +175,56 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function processarLote() {
 
-        const url = rotaLoteStep
-            .replace(':prova', provaAtual)
-            .replace(':index', index);
+    const url = rotaLoteStep
+        .replace(':prova', provaAtual)
+        .replace(':index', index);
 
-        fetch(url)
-            .then(r => r.json())
-            .then(data => {
+    fetch(url)
+        .then(r => r.json())
+        .then(data => {
 
-                if (data.finalizado) {
-                    window.location.href = rotaDownload.replace(':prova', provaAtual);
-                    return;
-                }
+            // 🔥 FINALIZOU
+            if (data.finalizado) {
 
-                index = data.index;
+                document.getElementById('barraLote').style.width = '100%';
+                document.getElementById('barraLote').innerText = '100%';
+
+                document.getElementById('statusLote').innerText =
+                    '✅ Finalizado!';
+
+                window.location.href =
+                    rotaDownload.replace(':prova', provaAtual);
+
+                return;
+            }
+
+            // 🔥 progresso
+            index = data.index;
+
+            let percent = Math.round((index / data.total) * 100);
+
+            document.getElementById('barraLote').style.width =
+                percent + '%';
+
+            document.getElementById('barraLote').innerText =
+                percent + '%';
+
+            document.getElementById('statusLote').innerText =
+                `Gerando ${index} de ${data.total}`;
+
+            // 🔥 pequeno delay
+            setTimeout(() => {
                 processarLote();
-            });
-    }
+            }, 50);
+        })
+        .catch(err => {
+
+            console.error(err);
+
+            document.getElementById('statusLote').innerText =
+                '❌ Erro ao gerar PDFs';
+        });
+}
 
     window.abrirModalLoteCorrecao = function(provaId) {
         provaCorrecao = provaId;
