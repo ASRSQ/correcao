@@ -24,13 +24,29 @@
 
         </div>
 
-        <button onclick="history.back()"
-                class="btn btn-secondary">
+      <div class="d-flex gap-2">
 
-            <i class="bi bi-arrow-left"></i>
-            Voltar
+    {{-- NOVA SÉRIE --}}
+    <a href="{{ route('series.create', [
+        'escola_id' => $escola->id
+    ]) }}"
+       class="btn btn-primary">
 
-        </button>
+        <i class="bi bi-plus-circle"></i>
+        Nova Série
+
+    </a>
+
+    {{-- VOLTAR --}}
+    <a href="{{ route('cidade.escolas', $escola->cidade_id) }}"
+       class="btn btn-secondary">
+
+        <i class="bi bi-arrow-left"></i>
+        Voltar
+
+    </a>
+
+</div>
 
     </div>
 
@@ -56,15 +72,44 @@
 
                     </h3>
 
-                   <a href="{{ route('escola.serie', [
-                        'escola' => $escola->id,
-                        'serie' => $serie->id
-                    ]) }}"
-                    class="btn btn-primary">
+                 <div class="d-flex justify-content-center gap-2 flex-wrap">
 
-                        Entrar
+    {{-- ENTRAR --}}
+    <a href="{{ route('escola.serie', [
+        'escola' => $escola->id,
+        'serie' => $serie->id
+    ]) }}"
+       class="btn btn-primary">
 
-                    </a>
+        <i class="bi bi-box-arrow-in-right"></i>
+        Entrar
+
+    </a>
+
+    {{-- EDITAR --}}
+    <a href="{{ route('series.edit', $serie->id) }}"
+       class="btn btn-warning">
+
+        <i class="bi bi-pencil"></i>
+
+    </a>
+
+    {{-- EXCLUIR --}}
+    <form action="{{ route('series.destroy', $serie->id) }}"
+          method="POST">
+
+        @csrf
+        @method('DELETE')
+
+        <button class="btn btn-danger">
+
+            <i class="bi bi-trash"></i>
+
+        </button>
+
+    </form>
+
+</div>
   
 
                 </div>
