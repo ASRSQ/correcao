@@ -3,62 +3,104 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Escola;
+use App\Models\Serie;
+use App\Models\Aluno;
+use App\Models\Cidade;
 
 class AlunoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
-    {
-        //
-    }
+{
+    $cidades = Cidade::all();
 
-    /**
-     * Store a newly created resource in storage.
-     */
+    return view(
+        'alunos.create',
+        compact('cidades')
+    );
+}
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nome' => 'required',
+            'matricula' => 'required',
+            'cidade_id' => 'required',
+            'escola_id' => 'required',
+            'serie_id' => 'required',
+        ]);
+
+        Aluno::create($request->all());
+
+        return redirect()->back();
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
     public function edit(string $id)
     {
-        //
+        $aluno = Aluno::findOrFail($id);
+
+        $cidades = Cidade::all();
+        $escolas = Escola::all();
+        $series = Serie::all();
+
+        return view(
+            'alunos.edit',
+            compact(
+                'aluno',
+                'cidades',
+                'escolas',
+                'series'
+            )
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function update(
+        Request $request,
+        string $id
+    ) {
+
+        $aluno = Aluno::findOrFail($id);
+
+        $request->validate([
+            'nome' => 'required',
+            'matricula' => 'required',
+            'cidade_id' => 'required',
+            'escola_id' => 'required',
+            'serie_id' => 'required',
+        ]);
+
+        $aluno->update($request->all());
+
+        return redirect()->back();
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $aluno = Aluno::findOrFail($id);
+
+        $aluno->delete();
+
+        return redirect()->back();
     }
+ 
+    public function serie(Escola $escola,Serie $serie) {
+
+    $alunos = Aluno::where(
+        'escola_id',
+        $escola->id
+    )
+    ->where(
+        'serie_id',
+        $serie->id
+    )
+    ->get();
+
+    return view(
+        'alunos.serie',
+        compact(
+            'escola',
+            'serie',
+            'alunos'
+        )
+    );
+}
 }

@@ -4,7 +4,7 @@
 
 <div class="container">
 
-    <h3 class="mb-4">➕ Resultado Avulso - {{ $prova->nome }}</h3>
+    <h3 class="mb-4">Resultado Avulso - {{ $prova->nome }}</h3>
 
     <form action="{{ route('resultados.avulso.store', $prova->id) }}" method="POST">
         @csrf
@@ -40,7 +40,7 @@
                 <!-- ⚠️ ALERTA SE NÃO TIVER GABARITO -->
                 @if($prova->gabaritos->isEmpty())
                     <div class="alert alert-danger">
-                        ❌ Essa prova não possui gabarito cadastrado.
+                        Essa prova não possui gabarito cadastrado.
                     </div>
                 @else
 
@@ -77,7 +77,7 @@
                 <!-- BOTÃO -->
                 <div class="text-end mt-3">
                     <button class="btn btn-success">
-                        💾 Salvar Resultado
+                        Salvar Resultado
                     </button>
                 </div>
 

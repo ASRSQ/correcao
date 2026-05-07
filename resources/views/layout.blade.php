@@ -1,44 +1,77 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Sistema de Provas</title>
+@extends('adminlte::page')
 
-    <!-- BOOTSTRAP -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Sistema de Provas')
 
-    <!-- ICONS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+@section('meta_tags')
 
-    <!-- CROP -->
-    <link href="https://unpkg.com/cropperjs/dist/cropper.min.css" rel="stylesheet"/>
-    <script src="https://unpkg.com/cropperjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <style>
-        body {
-            background: #f4f6f9;
-        }
-    </style>
-      <meta name="csrf-token" content="{{ csrf_token() }}">
-</head>
+@stop
 
-<body>
+{{-- CSS EXTRA --}}
+@section('css')
 
-<!-- NAVBAR -->
-<nav class="navbar navbar-dark bg-dark">
-    <div class="container-fluid">
-        <span class="navbar-brand mb-0 h1">
-            📊 Sistema de Correção de Provas
-        </span>
-    </div>
-</nav>
+{{-- BOOTSTRAP --}}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+      rel="stylesheet">
 
-<div class="container mt-4">
-    @yield('content')
+{{-- BOOTSTRAP ICONS --}}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
+      rel="stylesheet">
+
+{{-- CROPPER --}}
+<link href="https://unpkg.com/cropperjs/dist/cropper.min.css"
+      rel="stylesheet"/>
+
+<style>
+
+    body {
+        background: #f4f6f9;
+    }
+
+    .card {
+        border-radius: 12px;
+    }
+
+    .main-header.navbar {
+        border-bottom: none;
+    }
+
+    .content-wrapper {
+        background: #f4f6f9;
+    }
+
+</style>
+
+@stop
+
+{{-- HEADER --}}
+@section('content_header')
+
+
+@stop
+
+{{-- CONTEÚDO --}}
+@section('content')
+
+<div class="container-fluid">
+
+    @yield('page-content')
+
 </div>
 
-<!-- BOOTSTRAP JS -->
+@stop
+
+{{-- JS EXTRA --}}
+@section('js')
+
+{{-- BOOTSTRAP --}}
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
-</body>
-</html>
+{{-- CROPPER --}}
+<script src="https://unpkg.com/cropperjs"></script>
+
+{{-- CHART --}}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+@stop

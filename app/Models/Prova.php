@@ -27,5 +27,9 @@ class Prova extends Model
     {
         return $this->belongsTo(Serie::class);
     }
+    public function escola()
+{
+    return $this->belongsTo(Escola::class);
+}
     
 }

@@ -2,63 +2,102 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Serie;
+use App\Models\Escola;
 use Illuminate\Http\Request;
 
 class SerieController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $series = Serie::all();
+
+        return view(
+            'series.index',
+            compact('series')
+        );
+    }
+    public function area( Escola $escola,Serie $serie) {
+
+    return view(
+        'series.show',
+        compact('escola', 'serie')
+    );
+}
+
+    public function escola(Escola $escola)
+    {
+        $series = Serie::whereHas(
+            'alunos',
+            function ($query) use ($escola) {
+
+                $query->where(
+                    'escola_id',
+                    $escola->id
+                );
+
+            }
+        )->get();
+
+        return view(
+            'series.escola',
+            compact('escola', 'series')
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
-        //
+        return view('series.create');
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nome' => 'required'
+        ]);
+
+        Serie::create($request->all());
+
+        return redirect()
+            ->route('series.index');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
+
     public function edit(string $id)
     {
-        //
+        $serie = Serie::findOrFail($id);
+
+        return view(
+            'series.edit',
+            compact('serie')
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
+    public function update(
+        Request $request,
+        string $id
+    ) {
+
+        $serie = Serie::findOrFail($id);
+
+        $request->validate([
+            'nome' => 'required'
+        ]);
+
+        $serie->update($request->all());
+
+        return redirect()
+            ->route('series.index');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(string $id)
     {
-        //
+        $serie = Serie::findOrFail($id);
+
+        $serie->delete();
+
+        return redirect()
+            ->route('series.index');
     }
 }

@@ -7,6 +7,7 @@ use App\Models\Gabarito;
 use App\Models\Aluno;
 use App\Models\Resultado;
 use App\Models\Serie;
+use App\Models\CIdade;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -16,10 +17,11 @@ class ProvaController extends Controller
 {
     // LISTAR PROVAS
     public function index()
-    {
-        $provas = Prova::all();
-        return view('provas.index', compact('provas'));
-    }
+{
+    $cidades = Cidade::withCount('escolas')->get();
+
+    return view('dashboard.index', compact('cidades'));
+}
 
     // FORM DE CRIAÇÃO
 public function create()
@@ -360,5 +362,29 @@ public function storeAvulso(Request $request, $prova_id)
     ]);
 
     return redirect()->route('provas.resultado', $resultado->id);
+}
+public function serie(
+    Escola $escola,
+    Serie $serie
+) {
+
+    $provas = Prova::where(
+        'escola_id',
+        $escola->id
+    )
+    ->where(
+        'serie_id',
+        $serie->id
+    )
+    ->get();
+
+    return view(
+        'provas.index',
+        compact(
+            'provas',
+            'escola',
+            'serie'
+        )
+    );
 }
 }

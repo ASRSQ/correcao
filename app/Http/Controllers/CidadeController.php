@@ -26,7 +26,7 @@ class CidadeController extends Controller
 
         Cidade::create($request->all());
 
-        return redirect()->route('cidades.index');
+        return redirect()->route('provas.index');
     }
 
     public function edit($id)
@@ -46,7 +46,7 @@ class CidadeController extends Controller
 
         $cidade->update($request->all());
 
-        return redirect()->route('cidades.index');
+        return redirect()->route('provas.index');
     }
 
     public function destroy($id)
@@ -55,6 +55,6 @@ class CidadeController extends Controller
 
         $cidade->delete();
 
-        return redirect()->route('cidades.index');
+        return redirect()->route('provas.index');
     }
 }

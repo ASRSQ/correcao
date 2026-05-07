@@ -7,10 +7,13 @@
     <!-- TÍTULO -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">📊 Desempenho do Aluno</h3>
+<a href="{{ route('provas.index') }}"
+   class="btn btn-secondary">
 
-        <a href="{{ url()->previous() }}" class="btn btn-secondary">
-            ← Voltar
-        </a>
+    <i class="bi bi-arrow-left"></i>
+    Voltar
+
+</a>
     </div>
     </div>
 

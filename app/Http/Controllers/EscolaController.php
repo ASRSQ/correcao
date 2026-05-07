@@ -2,63 +2,119 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Cidade;
+use App\Models\Escola;
 use Illuminate\Http\Request;
 
 class EscolaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
-        //
+        $escolas = Escola::with('cidade')->get();
+
+        return view(
+            'escolas.index',
+            compact('escolas')
+        );
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
+    public function cidade(Cidade $cidade)
     {
-        //
+        $escolas = Escola::where(
+            'cidade_id',
+            $cidade->id
+        )
+        ->withCount('alunos')
+        ->get();
+
+        return view(
+            'escolas.cidade',
+            compact('cidade', 'escolas')
+        );
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+public function create(Request $request)
+{
+    $cidades = Cidade::all();
+
+    $cidade = null;
+
+    $escolas = collect();
+
+    if ($request->cidade_id) {
+
+        $cidade = Cidade::find(
+            $request->cidade_id
+        );
+
+        $escolas = Escola::where(
+            'cidade_id',
+            $request->cidade_id
+        )->get();
+
+    }
+
+    return view(
+        'escolas.create',
+        compact(
+            'cidades',
+            'cidade',
+            'escolas'
+        )
+    );
+}
+
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'nome' => 'required',
+            'cidade_id' => 'required'
+        ]);
+
+        $escola = Escola::create(
+            $request->all()
+        );
+
+        return redirect()->route(
+            'cidade.escolas',
+            $escola->cidade_id
+        );
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function edit(Escola $escola)
     {
-        //
+        $cidades = Cidade::all();
+
+        return view(
+            'escolas.edit',
+            compact('escola', 'cidades')
+        );
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
+    public function update(
+        Request $request,
+        Escola $escola
+    ) {
+
+        $escola->update(
+            $request->all()
+        );
+
+        return redirect()->route(
+            'cidade.escolas',
+            $escola->cidade_id
+        );
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    public function destroy(Escola $escola)
     {
-        //
-    }
+        $cidadeId = $escola->cidade_id;
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+        $escola->delete();
+
+        return redirect()->route(
+            'cidade.escolas',
+            $cidadeId
+        );
     }
 }
