@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Cidade;
+use App\Models\CIdade;
 use App\Models\Escola;
 use Illuminate\Http\Request;
 

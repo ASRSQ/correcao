@@ -31,5 +31,9 @@ class Prova extends Model
 {
     return $this->belongsTo(Escola::class);
 }
+public function questoes()
+{
+    return $this->hasMany(Questao::class);
+}
     
 }

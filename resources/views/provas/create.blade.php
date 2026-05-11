@@ -31,30 +31,97 @@
                                    required>
                         </div>
 
-                        <!-- ESCOLA -->
-                        <div class="mb-3">
-                            <label class="form-label">Escola</label>
-                            <select name="escola_id" class="form-select" required>
-                                <option value="">Selecione a escola</option>
-                                @foreach($escolas as $escola)
-                                    <option value="{{ $escola->id }}">
-                                        {{ $escola->nome }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+                       <div class="mb-3">
 
-                        <div class="mb-3">
-                            <label class="form-label">Série</label>
-                            <select name="serie_id" class="form-select" required>
-                                <option value="">Selecione a série</option>
-                                @foreach($series as $serie)
-                                    <option value="{{ $serie->id }}">
-                                        {{ $serie->nome }}
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
+    <label class="form-label">
+
+        Escola
+
+    </label>
+
+    <select name="escola_id"
+            class="form-select"
+            required
+
+            @if($escolaSelecionada)
+                disabled
+            @endif>
+
+        <option value="">
+            Selecione a escola
+        </option>
+
+        @foreach($escolas as $escola)
+
+        <option value="{{ $escola->id }}"
+
+            @if($escolaSelecionada == $escola->id)
+                selected
+            @endif>
+
+            {{ $escola->nome }}
+
+        </option>
+
+        @endforeach
+
+    </select>
+
+    @if($escolaSelecionada)
+
+    <input type="hidden"
+           name="escola_id"
+           value="{{ $escolaSelecionada }}">
+
+    @endif
+
+</div>
+
+                     <div class="mb-3">
+
+    <label class="form-label">
+
+        Série
+
+    </label>
+
+    <select name="serie_id"
+            class="form-select"
+            required
+
+            @if($serieSelecionada)
+                disabled
+            @endif>
+
+        <option value="">
+            Selecione a série
+        </option>
+
+        @foreach($series as $serie)
+
+        <option value="{{ $serie->id }}"
+
+            @if($serieSelecionada == $serie->id)
+                selected
+            @endif>
+
+            {{ $serie->nome }}
+
+        </option>
+
+        @endforeach
+
+    </select>
+
+    @if($serieSelecionada)
+
+    <input type="hidden"
+           name="serie_id"
+           value="{{ $serieSelecionada }}">
+
+    @endif
+
+</div>
 
                         <!-- QUESTÕES -->
                         <div class="mb-3">

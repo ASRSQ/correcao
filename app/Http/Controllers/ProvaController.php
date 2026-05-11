@@ -24,12 +24,26 @@ class ProvaController extends Controller
 }
 
     // FORM DE CRIAÇÃO
-public function create()
+public function create(Request $request)
 {
     $escolas = Escola::all();
-    $series = Serie::all(); // 🔥 agora certo
+    $series = Serie::all();
 
-    return view('provas.create', compact('escolas', 'series'));
+    $escolaSelecionada =
+        $request->escola_id;
+
+    $serieSelecionada =
+        $request->serie_id;
+
+    return view(
+        'provas.create',
+        compact(
+            'escolas',
+            'series',
+            'escolaSelecionada',
+            'serieSelecionada'
+        )
+    );
 }
     // SALVAR PROVA (SEM GABARITO AINDA)
  public function store(Request $request)

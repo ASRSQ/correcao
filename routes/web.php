@@ -8,15 +8,17 @@ use App\Http\Controllers\CidadeController;
 use App\Http\Controllers\EscolaController;
 use App\Http\Controllers\SerieController;
 use App\Http\Controllers\AlunoController;
+use App\Http\Controllers\ClassificacaoController;
+use Illuminate\Support\Facades\Auth;
 
+Auth::routes();
 
-
+Route::middleware('auth')->group(function () {
 /*
 |--------------------------------------------------------------------------
 | DASHBOARD
 |--------------------------------------------------------------------------
 */
-
 
 
 
@@ -85,6 +87,10 @@ Route::get(
     '/escolas/{escola}/series/{serie}/provas',
     [ProvaController::class, 'serie']
 )->name('serie.provas');
+Route::get(
+    '/dashboard/provas',
+    [ProvaController::class, 'dashboard']
+)->name('provas.dashboard');
 
 
 
@@ -205,3 +211,24 @@ Route::get(
     '/escolas/{escola}/series/{serie}/alunos',
     [AlunoController::class, 'serie']
 )->name('serie.alunos');
+
+Route::get(
+    '/provas/{prova}/classificacao',
+    [ClassificacaoController::class, 'index']
+)->name('provas.classificacao');
+
+Route::post(
+    '/provas/{prova}/categoria',
+    [ClassificacaoController::class, 'storeCategoria']
+)->name('provas.categoria');
+
+Route::post(
+    '/provas/{prova}/subcategoria',
+    [ClassificacaoController::class, 'storeSubcategoria']
+)->name('provas.subcategoria');
+
+Route::post(
+    '/provas/{prova}/salvar-classificacao',
+    [ClassificacaoController::class, 'salvarClassificacao']
+)->name('provas.salvar.classificacao');
+});

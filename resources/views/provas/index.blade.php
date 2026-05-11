@@ -125,6 +125,12 @@
                                 <i class="bi bi-camera"></i>
 
                             </button>
+                            <a href="{{ route('provas.classificacao', $prova->id) }}"
+                                class="btn btn-secondary btn-sm">
+
+                                    <i class="bi bi-tags"></i>
+
+                                </a>
 
                             <a href="{{ route('provas.dashboard', $prova->id) }}"
                                class="btn btn-dark btn-sm">
