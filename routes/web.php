@@ -11,7 +11,9 @@ use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\ClassificacaoController;
 use Illuminate\Support\Facades\Auth;
 
-Auth::routes();
+Auth::routes([
+    'register' => false
+]);
 
 Route::middleware('auth')->group(function () {
 /*
@@ -19,7 +21,15 @@ Route::middleware('auth')->group(function () {
 | DASHBOARD
 |--------------------------------------------------------------------------
 */
+Route::get(
+    '/register',
+    [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm']
+)->name('register');
 
+Route::post(
+    '/register',
+    [App\Http\Controllers\Auth\RegisterController::class, 'register']
+);
 
 
 /*
