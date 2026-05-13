@@ -825,11 +825,16 @@ foreach ($resultados as $resultado) {
 public function formAvulso($prova_id)
 {
     $prova = Prova::with('gabaritos')->findOrFail($prova_id);
-    $alunos = Aluno::where('escola_id', $prova->escola_id)
-               ->where('serie_id', $prova->serie_id)
-               ->get();
 
-    return view('provas.avulso', compact('prova', 'alunos'));
+    // 👇 somente alunos da série da prova
+    $alunos = Aluno::where('serie_id', $prova->serie_id)
+        ->orderBy('nome')
+        ->get();
+
+    return view(
+        'provas.avulso',
+        compact('prova', 'alunos')
+    );
 }
 public function storeAvulso(Request $request, $prova_id)
 {
@@ -865,7 +870,10 @@ public function storeAvulso(Request $request, $prova_id)
         'respostas'     => json_encode($respostas)
     ]);
 
-    return redirect()->route('provas.resultado', $resultado->id);
+   return redirect()->route(
+    'pdf.selecionar',
+    $prova->id
+);
 }
 public function serie(
     Escola $escola,

@@ -7,7 +7,7 @@
     <!-- TÍTULO -->
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h3 class="mb-0">📊 Desempenho do Aluno</h3>
-<a href="{{ route('provas.index') }}"
+<a href="{{ route('pdf.selecionar', $resultado->prova_id) }}"
    class="btn btn-secondary">
 
     <i class="bi bi-arrow-left"></i>

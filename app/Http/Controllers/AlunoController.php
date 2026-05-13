@@ -20,20 +20,25 @@ class AlunoController extends Controller
     );
 }
     public function store(Request $request)
-    {
-        $request->validate([
-            'nome' => 'required',
-            'matricula' => 'required',
-            'cidade_id' => 'required',
-            'escola_id' => 'required',
-            'serie_id' => 'required',
-        ]);
+{
+    $request->validate([
+        'nome' => 'required',
+        'matricula' => 'required',
+        'cidade_id' => 'required',
+        'escola_id' => 'required',
+        'serie_id' => 'required',
+    ]);
 
-        Aluno::create($request->all());
+    Aluno::create($request->all());
 
-        return redirect()->back();
-    }
-
+    return redirect()->route(
+        'serie.alunos',
+        [
+            'escola' => $request->escola_id,
+            'serie'  => $request->serie_id
+        ]
+    );
+}
     public function edit(string $id)
     {
         $aluno = Aluno::findOrFail($id);

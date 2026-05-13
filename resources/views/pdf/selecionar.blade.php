@@ -32,13 +32,17 @@
             </a>
 
             {{-- VOLTAR --}}
-            <button onclick="history.back()"
-                    class="btn btn-secondary">
+            <a href="{{ route('serie.provas', [
+        'escola' => $prova->escola_id,
+        'serie' => $prova->serie_id
+    ]) }}"
+   class="btn btn-secondary">
 
-                <i class="bi bi-arrow-left"></i>
-                Voltar
+    <i class="bi bi-arrow-left"></i>
 
-            </button>
+    Voltar
+
+</a>
 
         </div>
 
