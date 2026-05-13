@@ -10,6 +10,7 @@ use App\Http\Controllers\SerieController;
 use App\Http\Controllers\AlunoController;
 use App\Http\Controllers\ClassificacaoController;
 use Illuminate\Support\Facades\Auth;
+use App\Http\Controllers\Auth\RegisteredUserController;
 
 Auth::routes([
     'register' => false
@@ -18,21 +19,20 @@ Route::get(
     '/dashboard/provas/{prova}',
     [ProvaController::class, 'dashboard']
 )->name('provas.dashboard');
+
+Route::middleware(['auth', 'admin'])->group(function () {
+
+    Route::get('/register', [RegisteredUserController::class, 'create'])
+        ->name('register');
+
+    Route::post('/register', [RegisteredUserController::class, 'store']);
+});
 Route::middleware('auth')->group(function () {
 /*
 |--------------------------------------------------------------------------
 | DASHBOARD
 |--------------------------------------------------------------------------
 */
-Route::get(
-    '/register',
-    [App\Http\Controllers\Auth\RegisterController::class, 'showRegistrationForm']
-)->name('register');
-
-Route::post(
-    '/register',
-    [App\Http\Controllers\Auth\RegisterController::class, 'register']
-);
 
 
 /*
