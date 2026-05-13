@@ -76,23 +76,27 @@ public function create(Request $request)
         $prova = Prova::findOrFail($id);
         return view('provas.gabarito', compact('prova'));
     }
+public function salvarGabarito(Request $request, $id)
+{
+    // limpa gabarito antigo
+    Gabarito::where('prova_id', $id)->delete();
 
-    // SALVAR GABARITO
-    public function salvarGabarito(Request $request, $id)
-    {
-        // limpa gabarito antigo (caso edite)
-        Gabarito::where('prova_id', $id)->delete();
+    foreach ($request->gabarito as $questao => $resposta) {
 
-        foreach ($request->gabarito as $questao => $resposta) {
-            Gabarito::create([
-                'prova_id' => $id,
-                'questao' => $questao,
-                'resposta' => $resposta
-            ]);
-        }
-
-        return redirect('/')->with('success', 'Gabarito salvo!');
+        Gabarito::create([
+            'prova_id' => $id,
+            'questao'  => $questao,
+            'resposta' => $resposta
+        ]);
     }
+
+    $prova = Prova::findOrFail($id);
+
+    return redirect()->route('serie.provas', [
+        'escola' => $prova->escola_id,
+        'serie'  => $prova->serie_id
+    ])->with('success', 'Gabarito salvo!');
+}
 public function corrigirLoteStep(Request $request, $provaId)
 {
     \Log::info('CORRIGIR LOTE CHAMADO', [

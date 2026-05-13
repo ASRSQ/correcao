@@ -122,6 +122,8 @@ canvas{
             </div>
 @auth
 
+<div class="d-flex gap-2">
+
     <a href="{{ route('provas.index') }}"
        class="btn btn-outline-primary">
 
@@ -129,6 +131,17 @@ canvas{
         Voltar
 
     </a>
+
+    <button
+        class="btn btn-outline-success"
+        onclick="copiarLink()">
+
+        <i class="bi bi-share"></i>
+        Compartilhar
+
+    </button>
+
+</div>
 
 @endauth
         </div>

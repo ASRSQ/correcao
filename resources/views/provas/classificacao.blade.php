@@ -15,14 +15,17 @@
 
     </h4>
 
-    <a href="{{ url()->previous() }}"
-       class="btn btn-secondary">
+  <a href="{{ route('serie.provas', [
+        'escola' => $prova->escola_id,
+        'serie' => $prova->serie_id
+    ]) }}"
+   class="btn btn-secondary">
 
-        <i class="bi bi-arrow-left"></i>
+    <i class="bi bi-arrow-left"></i>
 
-        Voltar
+    Voltar
 
-    </a>
+</a>
 
 </div>
 
