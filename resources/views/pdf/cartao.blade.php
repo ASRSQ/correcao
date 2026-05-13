@@ -222,13 +222,93 @@ body {
                 ])) !!}
         </div>
     </div>
-
 @php
+
 $total = $prova->qtd_questoes;
 
-$porColuna = 10; // 🔥 padrão fixo
+/*
+|--------------------------------------------------------------------------
+| REGRAS DE DISTRIBUIÇÃO
+|--------------------------------------------------------------------------
+|
+| até 20  -> 2 colunas
+| até 30  -> 3 colunas
+| até 40  -> 4 colunas (10)
+| até 44  -> 4 colunas (11)
+| até 48  -> 4 colunas (12)
+| até 52  -> 4 colunas (13)
+| até 56  -> 4 colunas (14)
+| até 60  -> 4 colunas (15)
+| acima   -> automático
+|
+|--------------------------------------------------------------------------
+*/
+
+if ($total <= 20) {
+
+    $colunas = 2;
+
+} elseif ($total <= 30) {
+
+    $colunas = 3;
+
+} elseif ($total <= 60) {
+
+    $colunas = 4;
+
+} else {
+
+    $colunas = 5;
+}
+
+/*
+|--------------------------------------------------------------------------
+| QUESTÕES POR COLUNA
+|--------------------------------------------------------------------------
+*/
+
+if ($total <= 40) {
+
+    $porColuna = 10;
+
+} elseif ($total <= 44) {
+
+    $porColuna = 11;
+
+} elseif ($total <= 48) {
+
+    $porColuna = 12;
+
+} elseif ($total <= 52) {
+
+    $porColuna = 13;
+
+} elseif ($total <= 56) {
+
+    $porColuna = 14;
+
+} elseif ($total <= 60) {
+
+    $porColuna = 15;
+
+} else {
+
+    $porColuna = ceil($total / $colunas);
+}
+
+/*
+|--------------------------------------------------------------------------
+| DISTRIBUIÇÃO
+|--------------------------------------------------------------------------
+*/
+
 $questoes = range(1, $total);
-$chunks = array_chunk($questoes, $porColuna);
+
+$chunks = array_chunk(
+    $questoes,
+    $porColuna
+);
+
 @endphp
 
 <div class="scan-area">

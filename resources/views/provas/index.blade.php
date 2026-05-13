@@ -138,6 +138,23 @@
                                 <i class="bi bi-bar-chart"></i>
 
                             </a>
+                                <!-- EXCLUIR -->
+                            <form
+                                action="{{ route('provas.destroy', $prova->id) }}"
+                                method="POST"
+                                onsubmit="return confirm('Deseja excluir esta prova?')"
+                            >
+
+                                @csrf
+                                @method('DELETE')
+
+                                <button class="btn btn-outline-danger btn-sm">
+
+                                    <i class="bi bi-trash"></i>
+
+                                </button>
+
+                            </form>
 
                         </div>
 

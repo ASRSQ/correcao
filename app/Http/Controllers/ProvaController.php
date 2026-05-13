@@ -12,6 +12,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use App\Models\Escola;
+use App\Models\Category;
+use App\Models\Subcategory;
+use App\Models\Questao;
 
 class ProvaController extends Controller
 {
@@ -101,6 +104,7 @@ public function corrigirLoteStep(Request $request, $provaId)
 
     // 🔥 recebe 1 imagem (não array)
     $imagem = $request->file('imagem');
+    
 
     if (!$imagem) {
         return response()->json([
@@ -108,8 +112,14 @@ public function corrigirLoteStep(Request $request, $provaId)
             'message' => 'Imagem não enviada'
         ]);
     }
-
+    
     $imagemContent = file_get_contents($imagem);
+    \Log::info('DADOS ENVIADOS PARA O OMR', [
+    'prova_id' => $prova->id,
+    'qtd_questoes' => $prova->qtd_questoes,
+    'qtd_alternativas' => $prova->qtd_alternativas,
+    'arquivo' => $imagem->getClientOriginalName(),
+]);
 
     $response = Http::attach(
         'file',
@@ -307,30 +317,506 @@ public function resultados_update(Request $request, $id)
         ->route('provas.resultado', $resultado->id)
         ->with('success', 'Respostas atualizadas com sucesso!');
 }
-public function dashboard()
+public function dashboard(Prova $prova)
 {
-    return view('provas.dashboard', [
-        'questoes' => range(1, 10),
-        'acertosQuestoes' => [10,8,7,9,6,5,10,9,8,7],
+    // =========================================
+    // RESULTADOS
+    // =========================================
+    $resultados = Resultado::with('aluno')
+        ->where('prova_id', $prova->id)
+        ->get();
 
-        'geral' => [
-            'acertos' => 75,
-            'erros' => 25
-        ],
+    // =========================================
+    // QUESTÕES
+    // =========================================
+    $questoesBanco = Questao::with(
+            'subcategory.category'
+        )
+        ->where('prova_id', $prova->id)
+        ->orderBy('numero')
+        ->get();
 
-        'categorias' => [
-            'Matemática' => 30,
-            'Português' => 25,
-            'Ciências' => 20
-        ],
+    // =========================================
+    // GABARITO
+    // =========================================
+    $gabaritos = Gabarito::where(
+        'prova_id',
+        $prova->id
+    )->get();
 
-        'subcategorias' => [
-            'Álgebra' => 15,
-            'Geometria' => 15,
-            'Gramática' => 10,
-            'Interpretação' => 15
+    $gabarito = [];
+
+    foreach ($gabaritos as $item) {
+
+        $gabarito[$item->questao]
+            = strtoupper($item->resposta);
+    }
+
+    // =========================================
+    // LABELS DAS QUESTÕES
+    // =========================================
+    $labelsQuestoes = [];
+
+    foreach ($questoesBanco as $questao) {
+
+        $labelsQuestoes[] =
+
+            'Q' . $questao->numero
+
+            . ' - '
+
+            . $questao->subcategory
+                ->category
+                ->nome
+
+            . ' | '
+
+            . $questao->subcategory
+                ->nome;
+    }
+
+    // =========================================
+    // ACERTOS POR QUESTÃO
+    // =========================================
+    $acertosQuestoes = [];
+
+    foreach ($questoesBanco as $questao) {
+
+        $contador = 0;
+
+        foreach ($resultados as $resultado) {
+
+            $respostasAluno = json_decode(
+                $resultado->respostas,
+                true
+            );
+
+            $respostaAluno =
+                strtoupper(
+                    $respostasAluno
+                    [$questao->numero] ?? ''
+                );
+
+            $respostaCorreta =
+                strtoupper(
+                    $gabarito
+                    [$questao->numero] ?? ''
+                );
+
+            if (
+                $respostaAluno !== '' &&
+                $respostaAluno === $respostaCorreta
+            ) {
+
+                $contador++;
+            }
+        }
+
+        $acertosQuestoes[] = $contador;
+    }
+
+    // =========================================
+    // CATEGORIAS
+    // =========================================
+    $categorias = [];
+
+    // =========================================
+    // SUBCATEGORIAS
+    // =========================================
+    $subcategorias = [];
+
+    // =========================================
+    // DETALHES DOS ALUNOS
+    // =========================================
+    $detalhesAlunos = [];
+
+    foreach ($resultados as $resultado) {
+
+        $nomeAluno =
+            $resultado->aluno->nome;
+
+        $detalhesAlunos[$nomeAluno] = [
+
+            'acertos' => [],
+            'erros' => []
+        ];
+
+        $respostasAluno = json_decode(
+            $resultado->respostas,
+            true
+        );
+
+        foreach ($questoesBanco as $questao) {
+
+            $numeroQuestao =
+                $questao->numero;
+
+            $categoria =
+                $questao->subcategory
+                    ->category
+                    ->nome;
+
+            $subcategoria =
+                '[' .
+                $questao->subcategory
+                    ->category
+                    ->nome
+                . '] '
+                .
+                $questao->subcategory
+                    ->nome;
+
+            // =================================
+            // INICIALIZA
+            // =================================
+            if (!isset($categorias[$categoria])) {
+
+                $categorias[$categoria] = 0;
+            }
+
+            if (!isset($subcategorias[$subcategoria])) {
+
+                $subcategorias[$subcategoria] = 0;
+            }
+
+            // =================================
+            // RESPOSTAS
+            // =================================
+            $respostaAluno =
+                strtoupper(
+                    $respostasAluno
+                    [$numeroQuestao] ?? ''
+                );
+
+            $respostaCorreta =
+                strtoupper(
+                    $gabarito
+                    [$numeroQuestao] ?? ''
+                );
+
+            // =================================
+            // ACERTO
+            // =================================
+            if (
+                $respostaAluno !== '' &&
+                $respostaAluno === $respostaCorreta
+            ) {
+
+                $categorias[$categoria]++;
+                $subcategorias[$subcategoria]++;
+
+                $detalhesAlunos
+                [$nomeAluno]
+                ['acertos'][] = [
+
+                    'questao' =>
+                        $numeroQuestao,
+
+                    'categoria' =>
+                        $categoria,
+
+                    'subcategoria' =>
+                        $subcategoria
+                ];
+            }
+
+            // =================================
+            // ERRO
+            // =================================
+            else {
+
+                $detalhesAlunos
+                [$nomeAluno]
+                ['erros'][] = [
+
+                    'questao' =>
+                        $numeroQuestao,
+
+                    'categoria' =>
+                        $categoria,
+
+                    'subcategoria' =>
+                        $subcategoria,
+
+                    'resposta_aluno' =>
+                        $respostaAluno,
+
+                    'resposta_correta' =>
+                        $respostaCorreta
+                ];
+            }
+        }
+    }
+
+    // =========================================
+    // ACERTOS POR CATEGORIA POR ALUNO
+    // =========================================
+   // =========================================
+// ACERTOS POR CATEGORIA POR ALUNO
+// =========================================
+$desempenhoCategorias = [];
+
+foreach ($resultados as $resultado) {
+
+    $nomeAluno =
+        $resultado->aluno->nome;
+
+    $desempenhoCategorias[$nomeAluno] = [];
+
+    // respostas do aluno
+    $respostasAluno = json_decode(
+        $resultado->respostas,
+        true
+    );
+
+    foreach ($questoesBanco as $questao) {
+
+        $numeroQuestao =
+            $questao->numero;
+
+        $categoria =
+            $questao->subcategory
+                ->category
+                ->nome;
+
+        // inicia categoria
+        if (
+            !isset(
+                $desempenhoCategorias
+                [$nomeAluno]
+                [$categoria]
+            )
+        ) {
+
+            $desempenhoCategorias
+            [$nomeAluno]
+            [$categoria] = 0;
+        }
+
+        // resposta marcada
+        $respostaAluno =
+            strtoupper(
+                trim(
+                    $respostasAluno
+                    [$numeroQuestao] ?? ''
+                )
+            );
+
+        // resposta correta
+        $respostaCorreta =
+            strtoupper(
+                trim(
+                    $gabarito
+                    [$numeroQuestao] ?? ''
+                )
+            );
+
+        // ignora sem resposta
+        if (
+            empty($respostaAluno)
+        ) {
+            continue;
+        }
+
+        // compara
+        if (
+            $respostaAluno ===
+            $respostaCorreta
+        ) {
+
+            $desempenhoCategorias
+            [$nomeAluno]
+            [$categoria]++;
+        }
+    }
+
+    // =====================================
+    // GARANTE QUE BATA COM TOTAL
+    // =====================================
+    $somaCategorias = array_sum(
+        $desempenhoCategorias
+        [$nomeAluno]
+    );
+
+    // ajuste automático
+    if (
+        $somaCategorias >
+        $resultado->acertos
+    ) {
+
+        $diferenca =
+            $somaCategorias
+            -
+            $resultado->acertos;
+
+        $ultimaCategoria =
+            array_key_last(
+                $desempenhoCategorias
+                [$nomeAluno]
+            );
+
+        $desempenhoCategorias
+        [$nomeAluno]
+        [$ultimaCategoria]
+        -= $diferenca;
+    }
+}
+
+    // =========================================
+    // RANKING
+    // =========================================
+    $ranking = $resultados
+        ->sortByDesc('acertos')
+        ->values()
+        ->map(function ($resultado) {
+
+            $percentual =
+                $resultado->qtd_questoes > 0
+                ? round(
+                    (
+                        $resultado->acertos
+                        /
+                        $resultado->qtd_questoes
+                    ) * 100
+                )
+                : 0;
+
+            return [
+
+                'nome' =>
+                    $resultado->aluno->nome ?? 'Aluno',
+
+                'acertos' =>
+                    $resultado->acertos,
+
+                'erros' =>
+                    $resultado->erros,
+
+                'percentual' =>
+                    $percentual
+            ];
+        });
+
+    // =========================================
+    // GERAL
+    // =========================================
+    $geral = [
+
+        'acertos' =>
+            $resultados->sum('acertos'),
+
+        'erros' =>
+            $resultados->sum('erros')
+    ];
+
+    // =========================================
+    // MÉDIA DA TURMA
+    // =========================================
+    $mediaTurma = round(
+        $resultados->avg('acertos'),
+        1
+    );
+
+    // =========================================
+    // QUESTÃO MAIS DIFÍCIL
+    // =========================================
+    $questaoMaisDificil = null;
+    $questaoMaisFacil = null;
+
+    if (!empty($acertosQuestoes)) {
+
+        $menorAcerto = min($acertosQuestoes);
+
+        $questaoMaisDificil =
+            array_search(
+                $menorAcerto,
+                $acertosQuestoes
+            ) + 1;
+
+        // =====================================
+        // QUESTÃO MAIS FÁCIL
+        // =====================================
+        $maiorAcerto = max($acertosQuestoes);
+
+        $questaoMaisFacil =
+            array_search(
+                $maiorAcerto,
+                $acertosQuestoes
+            ) + 1;
+    }
+
+    // =========================================
+    // MELHOR ALUNO
+    // =========================================
+    $melhorAluno =
+        $ranking->first();
+
+//     dd(
+
+//     $resultado->aluno->nome,
+
+//     $resultado->acertos,
+
+//     $desempenhoCategorias
+//     [$nomeAluno],
+//      $questoesBanco->count(),
+
+//     array_sum(
+//         $desempenhoCategorias
+//         [$nomeAluno]
+//     )
+
+// );
+
+    // =========================================
+    // VIEW
+    // =========================================
+    return view(
+        'provas.dashboard',
+        [
+
+            'prova' => $prova,
+
+            'ranking' => $ranking,
+
+            'questoes' =>
+                $questoesBanco
+                    ->pluck('numero'),
+
+            'labelsQuestoes' =>
+                $labelsQuestoes,
+
+            'acertosQuestoes' =>
+                $acertosQuestoes,
+
+            'geral' =>
+                $geral,
+
+            'categorias' =>
+                $categorias,
+
+            'subcategorias' =>
+                $subcategorias,
+
+            'mediaTurma' =>
+                $mediaTurma,
+
+            'questaoMaisDificil' =>
+                $questaoMaisDificil,
+
+            'questaoMaisFacil' =>
+                $questaoMaisFacil,
+
+            'melhorAluno' =>
+                $melhorAluno,
+
+            'desempenhoCategorias' =>
+                $desempenhoCategorias,
+
+            'detalhesAlunos' =>
+                $detalhesAlunos
         ]
-    ]);
+    );
 }
 public function formAvulso($prova_id)
 {
@@ -400,5 +886,37 @@ public function serie(
             'serie'
         )
     );
+}
+public function destroy($id)
+{
+    $prova = Prova::findOrFail($id);
+
+    // remove gabaritos
+    Gabarito::where(
+        'prova_id',
+        $prova->id
+    )->delete();
+
+    // remove resultados
+    Resultado::where(
+        'prova_id',
+        $prova->id
+    )->delete();
+
+    // remove questões
+    Questao::where(
+        'prova_id',
+        $prova->id
+    )->delete();
+
+    // remove prova
+    $prova->delete();
+
+    return redirect()
+        ->back()
+        ->with(
+            'success',
+            'Prova excluída com sucesso!'
+        );
 }
 }

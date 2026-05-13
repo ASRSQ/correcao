@@ -14,7 +14,10 @@ use Illuminate\Support\Facades\Auth;
 Auth::routes([
     'register' => false
 ]);
-
+Route::get(
+    '/dashboard/provas/{prova}',
+    [ProvaController::class, 'dashboard']
+)->name('provas.dashboard');
 Route::middleware('auth')->group(function () {
 /*
 |--------------------------------------------------------------------------
@@ -97,11 +100,11 @@ Route::get(
     '/escolas/{escola}/series/{serie}/provas',
     [ProvaController::class, 'serie']
 )->name('serie.provas');
-Route::get(
-    '/dashboard/provas',
-    [ProvaController::class, 'dashboard']
-)->name('provas.dashboard');
 
+Route::delete(
+    '/provas/{id}',
+    [ProvaController::class, 'destroy']
+)->name('provas.destroy');
 
 
 /*
