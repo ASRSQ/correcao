@@ -25,25 +25,36 @@ class SerieController extends Controller
     );
 }
 
-    public function escola(Escola $escola)
-    {
-        $series = Serie::whereHas(
-            'alunos',
-            function ($query) use ($escola) {
+   public function escola(Escola $escola)
+{
+    $series = Serie::whereHas(
+        'alunos',
+        function ($query) use ($escola) {
 
-                $query->where(
-                    'escola_id',
-                    $escola->id
-                );
+            $query->where(
+                'escola_id',
+                $escola->id
+            );
 
-            }
-        )->get();
+        }
+    )
+    ->withCount([
+        'alunos as alunos_count' => function ($query) use ($escola) {
 
-        return view(
-            'series.escola',
-            compact('escola', 'series')
-        );
-    }
+            $query->where(
+                'escola_id',
+                $escola->id
+            );
+
+        }
+    ])
+    ->get();
+
+    return view(
+        'series.escola',
+        compact('escola', 'series')
+    );
+}
 
     public function create()
     {

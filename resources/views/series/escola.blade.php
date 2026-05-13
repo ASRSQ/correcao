@@ -71,8 +71,14 @@
                         {{ $serie->nome }}
 
                     </h3>
+                    <p class="text-muted mb-3">
+
+    {{ $serie->alunos_count }} alunos
+
+</p>
 
                  <div class="d-flex justify-content-center gap-2 flex-wrap">
+                    
 
     {{-- ENTRAR --}}
     <a href="{{ route('escola.serie', [

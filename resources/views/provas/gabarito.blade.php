@@ -10,9 +10,17 @@
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h4 class="mb-0">📝 Gabarito - {{ $prova->nome }}</h4>
 
-                <a href="{{ route('provas.index') }}" class="btn btn-secondary">
-                    ← Voltar
-                </a>
+               <a href="{{ route('serie.provas', [
+        'escola' => $prova->escola_id,
+        'serie' => $prova->serie_id
+    ]) }}"
+   class="btn btn-secondary">
+
+    <i class="bi bi-arrow-left"></i>
+
+    Voltar
+
+</a>
             </div>
 
             @if(session('success'))

@@ -124,13 +124,17 @@ canvas{
 
 <div class="d-flex gap-2">
 
-    <a href="{{ route('provas.index') }}"
-       class="btn btn-outline-primary">
+   <a href="{{ route('serie.provas', [
+        'escola' => $prova->escola_id,
+        'serie' => $prova->serie_id
+    ]) }}"
+   class="btn btn-secondary">
 
-        <i class="bi bi-arrow-left"></i>
-        Voltar
+    <i class="bi bi-arrow-left"></i>
 
-    </a>
+    Voltar
+
+</a>
 
     <button
         class="btn btn-outline-success"
@@ -848,6 +852,18 @@ new Chart(
         }
     }
 );
+
+
+</script>
+<script>
+
+function copiarLink() {
+
+    navigator.clipboard.writeText(window.location.href);
+
+    alert('Link copiado com sucesso!');
+
+}
 
 </script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
